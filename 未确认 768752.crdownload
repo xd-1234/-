@@ -1,0 +1,58 @@
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Enum, JSON
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from datetime import datetime
+import enum
+from app.db.database import Base
+
+class BookStatus(enum.Enum):
+    available = "available"
+    borrowed = "borrowed"
+    reserved = "reserved"
+
+class Book(Base):
+    __tablename__ = "books"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    category: Mapped[str] = mapped_column(String(100))
+    reading_level_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    reading_level_max: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    popularity: Mapped[int] = mapped_column(Integer, default=0)
+    status: Mapped[BookStatus] = mapped_column(Enum(BookStatus), default=BookStatus.available)
+    reserved_flag: Mapped[str | None] = mapped_column(String(10), nullable=True)  # 'B'
+    last_borrowed_at: Mapped[datetime | None]
+
+class Student(Base):
+    __tablename__ = "students"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    clazz: Mapped[str] = mapped_column(String(10))
+    reading_level: Mapped[int] = mapped_column(Integer, default=0)
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+class BorrowHistory(Base):
+    __tablename__ = "borrow_history"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("students.id"))
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id"))
+    borrowed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    returned_at: Mapped[datetime | None]
+    source: Mapped[str | None] = mapped_column(String(30))  # session/manual/fallback
+
+class Session(Base):
+    __tablename__ = "sessions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    date: Mapped[datetime] = mapped_column(DateTime)
+    clazz: Mapped[str] = mapped_column(String(10))  # 'B'
+    planned_students: Mapped[int] = mapped_column(Integer, default=5)
+    status: Mapped[str] = mapped_column(String(20), default="planned")  # planned/running/done
+
+class Recommendation(Base):
+    __tablename__ = "recommendations"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    session_id: Mapped[int] = mapped_column(ForeignKey("sessions.id"))
+    student_id: Mapped[int] = mapped_column(ForeignKey("students.id"))
+    primary_book_id: Mapped[int | None] = mapped_column(ForeignKey("books.id"))
+    alt_book_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    chosen_book_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    generated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    fallback_used: Mapped[bool] = mapped_column(Boolean, default=False)

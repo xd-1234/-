@@ -1,0 +1,27 @@
+[project]
+name = "smart-cabinet-backend"
+version = "0.1.0"
+description = "Backend for shared smart bookshelf allocation & recommendation"
+authors = [{name = "Your Name"}]
+requires-python = ">=3.11"
+
+dependencies = [
+  "fastapi>=0.110.0",
+  "uvicorn[standard]>=0.29.0",
+  "pydantic>=2.7",
+  "SQLAlchemy>=2.0",
+  "alembic>=1.13",
+  "psycopg[binary]>=3.1",
+  "python-dotenv>=1.0",
+  "orjson>=3.9",
+  "python-multipart>=0.0.9"
+]
+
+[tool.uvicorn]
+reload = true
+factory = false
+port = 8000
+host = "0.0.0.0"
+
+[tool.black]
+line-length = 100

@@ -1,0 +1,10 @@
+import os
+from pydantic import BaseModel
+
+class Settings(BaseModel):
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg://user:pass@localhost:5432/smartcabinet")
+    API_PREFIX: str = os.getenv("API_PREFIX", "/api")
+    B_CLASS_RESERVE_COUNT: int = int(os.getenv("B_CLASS_RESERVE_COUNT", "14"))
+    COOL_DOWN_WEEKS: int = int(os.getenv("COOL_DOWN_WEEKS", "6"))
+
+settings = Settings()
